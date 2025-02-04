@@ -1,0 +1,11 @@
+#ifndef RESOURCE_H
+#define RESOURCE_H
+
+#define IDI_APP_ICON 101
+#define IDC_STATIC_HOTKEY 102
+#define ID_BUTTON_DEFAULT 103
+#define ID_BUTTON_90 104
+#define ID_BUTTON_180 105
+#define ID_BUTTON_270 106
+
+#endif
