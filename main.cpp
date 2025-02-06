@@ -10,6 +10,10 @@
 #define WM_TRAYICON (WM_USER + 1)
 #define ID_TRAY_EXIT 1001
 #define IDC_CHECKBOX_MINIMIZE 1002
+#define HOTKEY_ID_UP 1
+#define HOTKEY_ID_RIGHT 2
+#define HOTKEY_ID_DOWN 3
+#define HOTKEY_ID_LEFT 4
 
 NOTIFYICONDATA nid;
 
@@ -64,22 +68,20 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
                 SaveCheckboxState(checked);
             }
             break;
-        case WM_KEYDOWN:
-            if ((GetKeyState(VK_CONTROL) & 0x8000) && (GetKeyState(VK_MENU) & 0x8000)) {
-                switch (wParam) {
-                    case VK_UP:
-                        RotateScreen(0);
-                        break;
-                    case VK_RIGHT:
-                        RotateScreen(1);
-                        break;
-                    case VK_DOWN:
-                        RotateScreen(2);
-                        break;
-                    case VK_LEFT:
-                        RotateScreen(3);
-                        break;
-                }
+        case WM_HOTKEY:
+            switch (wParam) {
+                case HOTKEY_ID_UP:
+                    RotateScreen(0);
+                    break;
+                case HOTKEY_ID_RIGHT:
+                    RotateScreen(1);
+                    break;
+                case HOTKEY_ID_DOWN:
+                    RotateScreen(2);
+                    break;
+                case HOTKEY_ID_LEFT:
+                    RotateScreen(3);
+                    break;
             }
             break;
         case WM_CTLCOLORBTN:
@@ -212,9 +214,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     HWND hHotKeysLabel = CreateWindowW(L"STATIC", L"Hot keys:", WS_VISIBLE | WS_CHILD,
                                        10, 10, 100, 20, hwnd, (HMENU)IDC_STATIC_HOTKEY, hInstance, NULL);
-
     SendMessage(hHotKeysLabel, WM_SETFONT, (WPARAM)hFontHotKeys, TRUE);
-        CreateWindowW(L"STATIC", L"CTRL+ALT+", WS_VISIBLE | WS_CHILD,
+
+    CreateWindowW(L"STATIC", L"CTRL+ALT+", WS_VISIBLE | WS_CHILD,
                   10, 47, 80, 20, hwnd, (HMENU)IDC_STATIC_HOTKEY, hInstance, NULL);
     CreateWindowW(L"BUTTON", L"\u2191", WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_OWNERDRAW,
                   90, 40, 30, 30, hwnd, (HMENU)ID_BUTTON_DEFAULT, hInstance, NULL);
@@ -248,11 +250,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         ShowWindow(hwnd, nCmdShow);
     }
 
+    // Register the hotkeys
+    RegisterHotKey(hwnd, HOTKEY_ID_UP, MOD_CONTROL | MOD_ALT, VK_UP);
+    RegisterHotKey(hwnd, HOTKEY_ID_RIGHT, MOD_CONTROL | MOD_ALT, VK_RIGHT);
+    RegisterHotKey(hwnd, HOTKEY_ID_DOWN, MOD_CONTROL | MOD_ALT, VK_DOWN);
+    RegisterHotKey(hwnd, HOTKEY_ID_LEFT, MOD_CONTROL | MOD_ALT, VK_LEFT);
+
     MSG msg = {};
     while (GetMessage(&msg, NULL, 0, 0)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
+
+    // Unregister the hotkeys
+    UnregisterHotKey(hwnd, HOTKEY_ID_UP);
+    UnregisterHotKey(hwnd, HOTKEY_ID_RIGHT);
+    UnregisterHotKey(hwnd, HOTKEY_ID_DOWN);
+    UnregisterHotKey(hwnd, HOTKEY_ID_LEFT);
 
     return 0;
 }
